@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_N 5000
+#define MAX_WH (1E+6)
+#define VALID_N(n) (1 <= n && n <= MAX_N) 
+#define VALID_W(w) (1 <= w && w <= MAX_WH)
+#define VALID_H(h) (1 <= h && h <= MAX_WH)
+#define VALID_WH(w,h) (VALID_W(w) && VALID_H(h))
+
+struct envelope {
+	unsigned int n;		/* envelope number */
+	unsigned int w;		/* width */
+	unsigned int h;		/* height */
+	unsigned long ec;	/* count of envelopes that can contain this */
+	struct envelope **pe;	/* array of parent envelopes */
+};
+
+struct envelope *ea; /* array of envelopes */
+struct envelope **le;
+
+int compare(const struct envelope *a, const struct envelope *b);
+
+int main()
+{
+
+	unsigned int n; 	/* count of envelope */
+	unsigned int w, h;	/* width and height of postal card */
+	int i, ii;
+	int ial, sal;		/* input array len and selected aray len */
+
+
+	scanf("%u %u %u", &n, &w, &h);
+	if (!VALID_WH(w,h) || !VALID_N(n))
+		return (0);
+
+	ea = (struct envelope *) calloc(n, sizeof(struct envelope));
+	le = (struct envelope **) calloc(n, sizeof(struct envelope *));
+
+	for (i = ii = 0; i < n; ++i) {
+		unsigned int wi, hi;	/* width and height of i-th envelope */
+
+		scanf("%u %u", &wi, &hi);
+		if (!VALID_WH(wi, hi))
+			return (0);
+
+		if (wi > w && hi > h) {
+			ea[ii].w = wi, ea[ii].h = hi, ea[ii].n = i+1;
+			ea[ii].ec = 0;
+			/* ea[ii].p = 2u * ((unsigned long) wi + (unsigned long) hi); */
+			++ii;
+		}
+	}	
+	ial = i;
+	sal = ii;
+
+	
+	qsort(ea, sal, sizeof(struct envelope), 
+	      (int(*) (const void *, const void *)) compare);
+
+	for (i = 0; i < sal; ++i) {
+		for (ii = i+1; ii < sal; ++ii)
+			if (ea[ii].w > ea[i].w && ea[ii].h > ea[i].h) {
+				if (ea[i].pe == NULL)
+					ea[i].pe = 
+					(struct envelope **)
+					calloc(n, sizeof(struct envelope *));
+				ea[i].pe[ea[i].ec] = &ea[ii];
+				++ea[i].ec;
+			}
+	}
+
+	/* printf debug */
+	/*
+	for (i = 0; i < sal; ++i) {
+		printf("%2d - %d %d :%d\n", 
+			ea[i].n, ea[i].w, ea[i].h, ea[i].ec);
+		putchar('\t'), putchar('\t');
+
+		for (ii = 0; ii < ea[i].ec; ++ii)
+			printf("%d ", 
+				(ea[i].pe[ii] != NULL) ? ea[i].pe[ii]->n : 0);
+		putchar('\n');
+	}
+	*/
+
+	struct envelope *mine, *cur;
+	int len = sal;
+	int le_cnt = 0;
+	mine = &ea[0];
+	cur = (sal == 0) ? NULL : ea;
+	while (cur != NULL) {
+		for (i = 0; (i < len && cur != NULL); ++i, ++cur) {
+			if (cur->ec > mine->ec)
+				mine = cur;	
+		}
+		if (mine != NULL) {
+			le[le_cnt] = mine;
+			++le_cnt;
+		} 
+		if (mine != NULL && mine->pe != NULL) {
+			cur = *mine->pe;
+			len = mine->ec;
+		} else {
+			cur = NULL;
+			len = 0;
+		}
+		mine = cur;
+	}
+	if (le_cnt != 0) {
+		printf("%d\n", le_cnt);
+		for (i = 0; (i < le_cnt && le[i] != NULL); ++i) {
+			printf("%d ", le[i]->n);
+		}
+	} else {
+		putchar('0');
+	}
+	putchar('\n');
+
+	free(ea);
+	free(le);
+
+	return (0);
+}
+
+int compare(const struct envelope *a, const struct envelope *b)
+{
+	return (a->w - b->w) + (a->h - b->h) + (b->ec - a->ec);
+}
+
+
