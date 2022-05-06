@@ -5,50 +5,43 @@
 #define MAXS ((long long int) 2E+5)
 #define cn(c) (c - 'a')
 
+char abc['z'];
+
 int main()
 {
 	int t;
 	char *s;
-
+	
 	s = (char *) calloc(MAXS, sizeof(char));
 
 	scanf("%d", &t);
 
 	while (t--) {
-		long long int n, k;
-		long long int len, i;
+		long long int n, k, i = 0;
 
 		scanf("%lld %lld", &n, &k);
 		getchar();
-		fgets(s, n+1, stdin);
-		len = strlen(s);
+		
+		for (i = 0; i < 'z'; ++i)
+			abc[i] = 0;
 
-		long long int stf = 0;
-		while (k > 0) {
-			long long int to, from, max = 0; 
-			for (i = 0; i < len; ++i) {
-				if (!cn(s[i]))
-					continue;
-				if (!max) {
-					if (cn(s[i]) <= k) {
-						max = cn(s[i]);
-						to = 0;
-						from = k;
-					} else {
-						max = k;
-						to = cn(s[i]) - max;
-						from = cn(s[i]);
-					}
-				}	
+		int c;
 
-				if (to < cn(s[i]) && cn(s[i]) <= from) {
-					if (!to && cn(s[i]) > max)
-						max = cn(s[i]);
-					s[i] = to + 'a';
+		while ((c=getchar()) != '\n' && c != EOF) {
+			while (c > 'a') {
+				if (abc[c]) {
+					--c;
+				} else if (k > 0) {
+					++abc[c];
+					--k;
+					--c;
+				} else {
+					break;
 				}
 			}
-			k -= max;
+			s[i++] = c;
 		}
+		s[i] = '\0';	
 			
 		printf("%s\n", s);
 	}
