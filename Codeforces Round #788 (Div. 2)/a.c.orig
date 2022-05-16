@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAXN ((int) 1e+5)
+#define abs(n) ((n < 0) ? -n : n)
+
+int main()
+{
+	int t;
+	int *a;
+	
+	a = (int *) calloc(MAXN, sizeof(int));
+
+	scanf("%d", &t);
+	getchar();
+
+	while (t--) {
+		int n, i ,j;
+		scanf("%d", &n);
+		getchar();
+		
+		int ai;
+		int dir = 0;
+		int dirc = 0;
+		int minus = 0;
+		int yes = 1;
+		for (i = 0; i < n; ++i) {
+			scanf("%d", &ai);
+			a[i] = ai;
+			if (!yes)
+				continue;
+			if (ai < 0)
+				++minus;
+			if (i == 1) {
+				if (abs(ai) < abs(a[i-1])) {
+					dir = -1 ;
+					++dirc;
+				} else {
+					dir = 1;
+				}
+			}
+			if (i > 1)
+				if (abs(ai) < abs(a[i-1]) && dir == 1) {
+					yes = 0;
+					continue;
+				} else if (dir == -1 && abs(ai) > abs(a[i-1])) {
+					dir = 1;
+				}
+
+			if (dir == -1)
+				++dirc;
+		}
+		getchar();
+		if (dirc == 0 && minus > 1)
+			yes = 0;
+		else if (dirc > 2 && (dirc != minus) && (yes == 1))
+			yes = 0;
+
+		printf("%s\n", (yes) ? "YES" : "NO");
+			
+	}
+
+	free(a);
+	return (0);
+}
